@@ -1,22 +1,17 @@
    const express = require('express');
    const app = express();
-   app.use("/user",(req,res,next)=>{
-      console.log("handling the route user");
-      next()
-      res.send("Response");
-   },
-(req,res)=>{
-   console.log("handling response");
-   res.send("2nd response");
-},
-(req,res)=>{
-   console.log("handling response");
-   res.send("3rd response");
-},
-(req,res)=>{
-   console.log("handling response");
-   res.send("4th response");
-})
+   const {userAuth,adminAuth}=require("./middleware/auth")
+
+   app.use("/admin",adminAuth,(req,res)=>{
+    res.send("all data sent")
+   })
+   app.use("/user",userAuth,(req,res)=>{
+    res.send("all data sent")
+   })
+
+   app.use("/user/login",(req,res)=>{
+    res.send("user login")
+   })
    app.listen(3000,()=>{
     console.log("server is calling")
    });
