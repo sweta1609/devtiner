@@ -17,6 +17,42 @@ app.post("/signup",async(req,res)=>{
 
 })
 
+app.get("/user",async(req,res)=>{
+         const mail=req.body.emailId;
+   try{
+ 
+//    const user=await User.find({emailId:mail})
+//    if(user.length  === 0){
+//       res.status(404).send("user not found")
+//    }else{
+//  res.send(user)
+//    }
+// finding one user from that email 
+  const user=await User.findOne({emailId:mail}).exec()
+   if(user.length  === 0){
+      res.status(404).send("user not found")
+   }else{
+ res.send(user)
+   }
+  
+   }catch(err){res.status(400).sen("user not found")}
+
+})
+
+app.get("/feed",async(req,res)=>{
+   try{
+      const users = await User.find({})
+      if(users?.length === 0){
+         res.status(404).send("no users found")
+      }else{
+         res.send(users)
+      }
+     
+   }catch(err){
+      res.status(400).send("user not found")
+   }
+})
+
    connectDB()
   .then(() => {
     // Start server after DB is connected
