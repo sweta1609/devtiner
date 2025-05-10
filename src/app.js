@@ -1,17 +1,19 @@
-   const express = require('express');
-   const app = express();
-   const connectDB=require("./config/database")
-   const User=require("./models/user")
+const express = require('express');
+const app = express();
+const connectDB=require("./config/database")
+const User=require("./models/user")
+
+app.use(express.json());
   
 app.post("/signup",async(req,res)=>{
-   const user=new User({
-      firstName:"Karan",
-      lastName:"Kapoor",
-      emailId:"karan.kapoor@gmail.com",
-      password:"karan123"
-   });
-   await user.save();
+  
+   const user=new User(req.body);
+   try{await user.save();
    res.send("user added successfully")
+}catch(err){
+   console.log(err)}
+   res.status(400).send("error saving middleware")
+   
 
 })
 
