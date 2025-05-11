@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator= require('validator')
 
 const userSchema=new mongoose.Schema({
     firstName:{
@@ -13,11 +14,23 @@ const userSchema=new mongoose.Schema({
         lowercase:true,
         required:true,
         unique:true,
-        trim:true
+        trim:true,
+        validate(value){
+            if(!validator.isEmail(value)){
+                throw new Error("Invalid email address"+value);
+            }
+
+        }
     },
     password:{
         type:String,
         required:true,
+        validate(value){
+            if(!validator.isStrongPassword(value)){
+                throw new Error("Invalid photo url"+value);
+            }
+
+        }
     },
     age:{
         type:Number,
@@ -32,7 +45,13 @@ const userSchema=new mongoose.Schema({
         }
     },
     photoUrl:{
-        type:String
+        type:String,
+        validate(value){
+            if(!validator.isURL(value)){
+                throw new Error("Invalid photo url"+value);
+            }
+
+        }
     },
     about:{
         type:String,
@@ -40,22 +59,22 @@ const userSchema=new mongoose.Schema({
     },
     skills:{
         type:[String],
-        validate:[{
-             validator:function(val){
-                return skills.length <= 5;
-            },
-            message:"you can specify upto  5 skills"
-        }
+        // validate:[{
+        //      validator:function(val){
+        //         return skills.length <= 5;
+        //     },
+        //     message:"you can specify upto  5 skills"
+        // }
         // ,
         // {
         //     validator:function(val){
-        //         return skills.length >=1;
+        //         return skills.length >=0;
 
         //     },
         //     message:"At least one skill is required"
         // }
           
-        ]
+        // ]
     }
 
 },
