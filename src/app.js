@@ -53,6 +53,43 @@ app.get("/feed",async(req,res)=>{
    }
 })
 
+app.delete("/user",async(req,res)=>{
+   const id = req.body.id
+   try{
+      const user = await User.findByIdAndDelete(id);
+      res.send("user deleted successfully")
+   }catch(error){
+      res.status(400).send("something went wrong")
+   }
+})
+
+app.patch("/user/:userId",async(req,res)=>{
+   const userId=req.params.userId;
+
+   const data=req.body; 
+ 
+
+   try{
+   const ALLOWED_UPDATES =["userId","photoUrl","about","gender","age","skills"]
+   const isUpdateAllowed =Object.keys(data).every((k)=>ALLOWED_UPDATES.includes(k))
+   if (!isUpdateAllowed){
+      throw new Error("update not allowed")
+   }
+   // if(data?.skills?.length >10){
+   //    throw new Error("skills can not be more then 10")
+   // }
+ 
+    await User.findByIdAndUpdate(userId, data, {
+  new: true,
+  runValidators: true
+});
+
+      res.send("user updated successfully")
+   }catch(error){
+      res.status(400).send(error.message)
+   }
+})
+
    connectDB()
   .then(() => {
     // Start server after DB is connected
