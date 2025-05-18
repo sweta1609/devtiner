@@ -2,9 +2,10 @@ const express= require("express")
 
 const authRouter = express.Router();
 const User=require("../models/user")
-const {validatePassword,getJWT}=require("../models/user")
+
 const bcrypt = require("bcrypt")
-const {validateSignUpData}=require("../utils/validation")
+const {validateSignUpData,validateNewPasswordStrength}=require("../utils/validation");
+const { userAuth } = require("../middleware/auth");
 authRouter.post("/signup",async(req,res)=>{
 
   
@@ -28,11 +29,13 @@ authRouter.post("/login",async(req,res)=>{
    try{
       const {emailId,password}=req.body;
       const user = await User.findOne({emailId:emailId});
+
       if(!user){
          throw new Error("Invalid credentials")
       }
 
       const isPasswordValid=await user.validatePassword(password)
+      console.log(isPasswordValid)
       if(isPasswordValid){
          // craete a jwt token
          // add token to cokkie and send respons eback to user
@@ -53,6 +56,20 @@ authRouter.post("/logout",async(req,res)=>{
         expires:new Date(Date.now())
     })
     res.send("Logout successfull")
+})
+authRouter.patch("/passwordchange",userAuth,async(req,res)=>{
+    try{
+           const user=req.user
+     validateNewPasswordStrength(req)
+   const passwordHash =await  bcrypt.hash(req.body.password,10)
+    user.password = passwordHash;
+    await user.save();
+
+    return res.status(200).json({ message: "Password updated successfully." });
+    }catch(error){
+        res.status(400).send("password could not be changed")
+    }
+ 
 })
 
 module.exports=authRouter;
