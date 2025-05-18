@@ -6,6 +6,10 @@ const User=require("./models/user")
 const bcrypt = require("bcrypt")
 const cookieParser= require("cookie-parser")
 const jwt = require("jsonwebtoken")
+const {userAuth}=require("./middleware/auth")
+require('dotenv').config();
+
+
 
 app.use(express.json());
 app.use(cookieParser())
@@ -29,28 +33,27 @@ app.post("/signup",async(req,res)=>{
 
 })
 
-app.get("/profile",async(req,res)=>{
+app.get("/profile",userAuth,async(req,res)=>{
    try{
-         const cookies=req.cookies;
-   // extract token from cookie
-   const {token} = cookies;
-   if (!token){
-      throw new Error("invalid token")
-   }
-   const isTokenValid=await jwt.verify(token,"DEV@Tinder")
-   const {_id}=isTokenValid
-   const user=await User.findById(_id)
-   if(!user){
-      throw new Error("User not found")
-   }
-   console.log(user)
+  
+   const user=req.user
+ 
    res.send(user)
    }catch(error){
        res.status(400).send("error loging in")
    }
 
 })
+app.post("/sendConnectionrequest",userAuth,async(req,res)=>{
+   try{
+      const user=req.user
+      res.send(user.firstName+" "+"connection request sent")
+   }
+   catch(error){
 
+       res.status(400).send("error sending connection request")
+      }
+})
 app.post("/login",async(req,res)=>{
    try{
       const {emailId,password}=req.body;
@@ -62,9 +65,10 @@ app.post("/login",async(req,res)=>{
       if(isPasswordValid){
          // craete a jwt token
          // add token to cokkie and send respons eback to user
-         const token = await jwt.sign({_id:user._id},"DEV@Tinder");
-         console.log(token)
-         res.cookie("token",token)      
+         const token = await jwt.sign({_id:user._id},process.env.JWT_SECRET,{expiresIn:'1d'});
+         res.cookie("token",token,{
+            expires:new Date(Date.now()+8*3600000)
+         })      
          
          res.send("Login successfull")
       }else{
